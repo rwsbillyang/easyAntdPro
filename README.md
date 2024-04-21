@@ -1,15 +1,11 @@
 # 1. easy-antd-pro
 - Easy to use [antd-pro](https://github.com/ant-design/ant-design-pro) because more out-of-box.
-- For pure react app, no umi dependent,  super lightweight.
+- For use in pure react app, not need [umi](https://umijs.org/en-US),  super lightweight.
 
 
 ## 1.1. Add dependency
 ```shell
-npm i easy-antd-pro@1.0.0
-```
-then add one line in depencies section in packege.json:
-```
-"easy-antd-pro": "^1.0.0",
+npm i easy-antd-pro
 ```
 
 
@@ -32,7 +28,7 @@ then add one line in depencies section in packege.json:
 
 #### 1.2.2.1. Simplest Table with CRUD
 
-```react
+```typescript
 export const DomainTable: React.FC = () => {
   const name = "domain"
 
@@ -61,7 +57,7 @@ Then we get a table with feature:
 
 
 defaultProps function:
-```react
+```typescript
 /**
  * 
  * @returns 返回 EasyProTableProps的部分属性
@@ -82,7 +78,7 @@ export function defaultProps(name: string, cacheTable: boolean = true, supportDe
 
 
 #### 1.2.2.2. Async Select Options
-```react
+```typescript
 {
       title: '所属',
       key: "domainId",
@@ -102,7 +98,7 @@ export function defaultProps(name: string, cacheTable: boolean = true, supportDe
 
 If need transform front-end biz data before sumitting to remote server, please use `transformBeforeSave`,  and accodingly transform the data from remote server to front-end biz data, please use `transformBeforeEdit`.
 
-```react
+```typescript
 export const ConstantTable: React.FC = () => {
   const name = "constant"
 
@@ -161,7 +157,7 @@ export const ConstantTable: React.FC = () => {
 
 #### 1.2.2.4. Customize toolBarRender
 
-```react
+```typescript
 export const BasicExpressionTable: React.FC = () => {
   const name = "expression"
   const [searchParams] = useSearchParams();
@@ -202,7 +198,7 @@ The list data could be transformed using listTransform in EasyProTable.
 
 expandable and onExpand are used to load subtree data when click expandable icon.
 
-```react
+```typescript
 export const RuleGroupTable: React.FC = () => {
     const [loadingTypeId, setLoadingTypeId] = useState<string>() //loading 
     const [path, setPath] = useState<string[]>()
@@ -294,7 +290,7 @@ export const RuleGroupTable: React.FC = () => {
 - disableDel:  disable delete feature
 - needLoadMore: not need load more feaure when load all data
 
-```react
+```typescript
 export const OpcodeTable: React.FC = () => {
   const name = "opcode"
 
@@ -322,7 +318,7 @@ export const OpcodeTable: React.FC = () => {
 - lastIdFunc: get lastId from list item for loadMore
 - editForm:  where navigate when not use default editor
 
-```react
+```typescript
 export const rubleTableProps = {
     ...defaultProps(RuleName), 
     idKey: "typedId",
@@ -339,7 +335,7 @@ A ProLayout based on react-router-dom for navigatiron.
 
 
 ### 1.3.1. Config Routes
-```react
+```typescript
 //main.tsx
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <BrowserRouter>
@@ -405,14 +401,14 @@ export const lazyLoad = (children: ReactNode): ReactNode => {
 ### 1.3.2. EasyProLayoutProps
 
 Basically same as ProLayoutProps:
-```react
+```typescript
 export interface EasyProLayoutProps extends ProLayoutProps{
     dark?: boolean
 }
 ```
 
 An example:
-```react
+```typescript
 const proLayoutProps: EasyProLayoutProps = {
   title: "Rule Composer",
   //logo: null,
