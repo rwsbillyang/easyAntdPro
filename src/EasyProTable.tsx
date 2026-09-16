@@ -1,18 +1,20 @@
 import React, { useEffect, useRef } from 'react';
-import { PlusOutlined, ExclamationCircleFilled } from '@ant-design/icons';
-import ProTable, { ProColumns, ProTableProps } from '@ant-design/pro-table';
-import { Cache, BasePageQuery, StorageType, CacheStorage, useCacheList, BaseRecord, UseCacheConfig, cachedFetch, cachedFetchPromise, ArrayUtil, TreeCache } from '@rwsbillyang/usecache';
-import { EditProps, EasyProTableProps } from './EasyProTableProps';
-import { EasyProConfig } from './EasyProConfig';
-
-import { LoadMore } from './LoadMore';
-import { BetaSchemaForm, ProFormInstance } from '@ant-design/pro-form';
-import { Button, Modal, message } from 'antd';
-const { confirm } = Modal;
-import useBus, { EventAction, dispatch } from 'use-bus';
 import { Link, useNavigate } from 'react-router-dom';
-import { RouteContext, RouteContextType } from '@ant-design/pro-layout';
 
+import { Button, Modal, message } from 'antd';
+import { PlusOutlined, ExclamationCircleFilled } from '@ant-design/icons';
+import { ProTable, type ProColumns, type ProTableProps } from '@ant-design/pro-components';
+import { RouteContext, type RouteContextType } from '@ant-design/pro-components';
+import { BetaSchemaForm, type ProFormInstance } from '@ant-design/pro-components';
+
+import useBus, { type EventAction, dispatch } from 'use-bus';
+
+import { Cache, type BasePageQuery, StorageType, CacheStorage, useCacheList, type BaseRecord, cachedFetch, cachedFetchPromise, ArrayUtil, TreeCache } from '@rwsbillyang/usecache';
+import { type EditProps, type EasyProTableProps } from './EasyProTableProps';
+import { EasyProConfig } from './EasyProConfig';
+import { LoadMore } from './LoadMore';
+
+const { confirm } = Modal;
 
 export interface UpdateTreeNodeParams{
   e: any
@@ -111,28 +113,28 @@ export const EasyProTable = <T extends BaseRecord, Q extends BasePageQuery = Bas
       if (isTree) {
         const p = e.payload as UpdateTreeNodeParams
         if (type.indexOf("add") >= 0) {
-          flag = TreeCache.onAddOneInTreeList(p.e, p.posPath, p.updateRelation, list, p.idKey, p.childrenFieldName)
+          flag = TreeCache.onAddOneInTree(p.e, p.posPath, p.updateRelation, p.idKey, list,  p.childrenFieldName)
         } else if (type.indexOf("edit") >= 0) {
-          flag = TreeCache.onEditOneInTree(p.e, p.posPath, list, p.idKey, p.childrenFieldName)
+          flag = TreeCache.onEditOneInTree(p.e, p.posPath, p.idKey, list, p.childrenFieldName)
         } else if (type.indexOf("del") >= 0) {
-          flag = TreeCache.onDelOneInTree(p.e, p.posPath, p.updateRelation, list, p.idKey, p.childrenFieldName)
+          flag = TreeCache.onDelOneInTree(p.e, p.posPath, p.updateRelation, p.idKey, list,  p.childrenFieldName)
         } else {
           console.warn("not support EventAction.type=" + type)
         }
       } else {
         if (type.indexOf("addoredit") >= 0) {
-          if (!Cache.onEditOneInList(e.e, list, "id"))
+          if (!Cache.onEditOneInList(e.e, "id", list))
             Cache.onAddOneInList(e.e, list)
           flag = true
         } else if (type.indexOf("add") >= 0) {
           Cache.onAddOneInList(e.e, list)
           flag = true
         } else if (type.indexOf("edit") >= 0) {
-          flag = Cache.onEditOneInList(e.e, list, "id")
+          flag = Cache.onEditOneInList(e.e, "id", list)
         } else if (type.indexOf("delbyid") >= 0) {
-          flag = Cache.onDelOneInList(e.id, list, "id")
+          flag = Cache.onDelOneInList(e.id, "id", list)
         } else if (type.indexOf("del") >= 0) {
-          flag = Cache.onDelOneInList(e.e, list, "id")
+          flag = Cache.onDelOneInList(e.e, "id", list)
         } else {
           console.warn("not support EventAction.type=" + type)
         }
@@ -180,7 +182,7 @@ export const EasyProTable = <T extends BaseRecord, Q extends BasePageQuery = Bas
   }
   //useBus('search', (e: EventAction)=>{(search(e.payload))})
 
-  const formRef = useRef<ProFormInstance>()
+  const formRef = useRef<ProFormInstance>(undefined)
   useEffect(() => {
     //applyinitalQuery(props.columns, props.initialQuery)
     formRef?.current?.setFieldsValue(current.query)//设置为上一次缓存的搜索form值
@@ -211,7 +213,7 @@ export const EasyProTable = <T extends BaseRecord, Q extends BasePageQuery = Bas
            //不存在saveApi，或 disableEdit返回true，则没编辑按钮
           (!props.saveApi || (props.disableEdit && props.disableEdit(row))) ? undefined: <EditorHub title={title} tableProps={props} style='Link' isAdd={false} record={row} columns={props.columns} key="edit" />,// EditorHub('Link', false, row, props.columns, props.editConfig), //报错，undefined of length
           //不存在delApi，或 disableDel返回true，则没删除按钮
-          (!props.delApi || (props.disableDel && props.disableDel(row)))? undefined : <a onClick={() => deleteOne(row, props.delApi + "/" + row[(props.idKey || UseCacheConfig.defaultIdentiyKey || "id")], undefined, props.listApi, props.cacheKey, props.idKey)} key="delete" >删除</a> ,
+          (!props.delApi || (props.disableDel && props.disableDel(row))) ? undefined : <a onClick={() => deleteOne(row, props.idKey, props.delApi + "/" + row[props.idKey], undefined, props.listApi, props.cacheKey)} key="delete" >删除</a> ,
         ].filter((e) => !!e)
       }
 
@@ -257,7 +259,7 @@ export const EasyProTable = <T extends BaseRecord, Q extends BasePageQuery = Bas
             } else {
               //排序时，若指定了sortKey则使用指定的，否则默认使用_id
              // const sortKey = (p?.sKey) ? p.sKey : (props.idKey || "_id")
-              const lastValue = props.lastIdFunc? props.lastIdFunc(list[list.length - 1]) : list[list.length - 1][(p?.sKey) ? p.sKey : (props.idKey || "_id")] + "" //转换为字符串
+              const lastValue = props.lastIdFunc ? props.lastIdFunc(list[list.length - 1]) : list[list.length - 1][ p?.sKey || props.idKey ] + "" //转换为字符串
               if (p)
                 p.lastId = lastValue
               else {
@@ -340,14 +342,15 @@ export function EasySchemaFormEditor<T extends BaseRecord, Q extends BasePageQue
     columns={columns}
     onFinish={async (v) => {
       return saveOne(v,
+        props.tableProps.idKey,
         props.isAdd ? props.tableProps.initialValues : props.record,
         props.tableProps.saveApi,
         props.tableProps.transformBeforeSave,
         undefined,
         props.isAdd,
         props.tableProps.listApi,
-        props.tableProps.cacheKey,
-        props.tableProps.idKey)
+        props.tableProps.cacheKey
+        )
     }}
     layout="horizontal"
   />
@@ -358,6 +361,7 @@ export function EasySchemaFormEditor<T extends BaseRecord, Q extends BasePageQue
 /**
  * 
  * @param values 需要保存的新值，将与旧值合并，因为编辑时并不是编辑全部信息，新值只有form中的信息
+ * @param idKey 保存成功后的动作：更新缓存需要
  * @param oldValues 旧值，未被编辑的值将存在于旧值中
  * @param saveApi 必须提供，否则给出错误提示
  * @param transformBeforeSave 保存前对值进行变换
@@ -365,19 +369,19 @@ export function EasySchemaFormEditor<T extends BaseRecord, Q extends BasePageQue
  * @param isAdd 是否新增
  * @param listApi 保存成功后的动作 更新缓存后需决定向哪个列表发送消息
  * @param cacheKey 保存成功后的动作：更新缓存需要
- * @param idKey 保存成功后的动作：更新缓存需要
+ * 
  * @returns 
  */
-export function saveOne<T extends BaseRecord, ResultType = T>(
+export function saveOne<T extends BaseRecord>(
   values: T,
+  idKey: keyof T,
   oldValues?: Partial<T>,
   saveApi?: string,
   transformBeforeSave?: (data: T) => T | undefined,
-  onSaveOK?: (data: ResultType) => void, //若提供了onSaveOK，可不提供后面的信息（用于更新缓存）
+  onSaveOK?: (data: T) => void, //若提供了onSaveOK，可不提供后面的信息（用于更新缓存）
   isAdd?: boolean,
   listApi?: string,
-  cacheKey?: string,
-  idKey?: string
+  cacheKey?: string
 ) {
   if (!saveApi) {
     console.warn("no saveApi")
@@ -395,19 +399,19 @@ export function saveOne<T extends BaseRecord, ResultType = T>(
     console.log("after values merge oldValues, new values=", newValues)
   }
 
-  const onOK = onSaveOK || ((data: ResultType) => {
+  const onOK = onSaveOK || ((data: T) => {
     message.success('保存成功');
 
-    const EasyIdKey = idKey || UseCacheConfig.defaultIdentiyKey || "id"
+    //const EasyIdKey = idKey || UseCacheConfig.defaultIdentiyKey || "id"
     if (cacheKey) {
       if (isAdd === undefined) {//未定状态，如Rule的新增也可能是更新
-        if (!Cache.onEditOne(cacheKey, data, EasyIdKey)) {//未找到更新，则按新增处理
+        if (!Cache.onEditOne(cacheKey, data, idKey)) {//未找到更新，则按新增处理
           Cache.onAddOne(cacheKey, data)
         }
       } else if (isAdd) {
         Cache.onAddOne(cacheKey, data)
       } else {
-        Cache.onEditOne(cacheKey, data, EasyIdKey)
+        Cache.onEditOne(cacheKey, data, idKey)
       }
       if (listApi) dispatch("cacheUpdate-" + listApi)
     }else{
@@ -431,7 +435,7 @@ export function saveOne<T extends BaseRecord, ResultType = T>(
   //   console.log("after transformed, values=", transformedData);
   // }
 
-  cachedFetchPromise<ResultType>(saveApi, 'POST', transformedData)//undefined, StorageType.OnlySessionStorage, undefined,undefined,false
+  cachedFetchPromise<T>(saveApi, 'POST', transformedData)//undefined, StorageType.OnlySessionStorage, undefined,undefined,false
     .then((data) => {
       if (data) {
         onOK(data)
@@ -447,55 +451,61 @@ export function saveOne<T extends BaseRecord, ResultType = T>(
 }
 
 /**
- * 
+ * T 为待删除的object记录类型，R为后端delApi返回的结果类型
  * @param item 待删除项
+ * @param idKey 更新缓存比较时，以哪个键为准
  * @param delApi 删除api
  * @param onDelOk 删除成功后的回调，用于更新缓存，可自定义, 若提供了onDelOk可不提供后面的缓存参数
  * @param listApi 消息通知更新哪个列表
  * @param cacheKey 删除项所对应缓存
- * @param idKey 更新缓存比较时，以哪个键为准
+ * 
  * @returns 
  */
-export function deleteOne<T = number>(
-  item: Record<string, any>,
+export function deleteOne<T extends object, R = number>(
+  item: T,
+  idKey: keyof T, 
   delApi?: string,
-  onDelOk?: (result: T) => void,
+  onDelOk?: (resultFromRemoteDelApi: R) => void,
   listApi?: string,
-  cacheKey?: string,
-  idKey?: string
+  cacheKey?: string
 ) {
   if (!delApi) {
     alert("no delApi")
     return
   }
 
-  const id = item ? item[idKey || UseCacheConfig.defaultIdentiyKey] : undefined
-  if (!onDelOk && !id) {
+  const id = item[idKey] as (string | number | undefined)//getValueByKey(item, idKey as string)
+  if (!id) {
     alert("no id")
     console.warn("no id when del, please set pageProps.key or UseCacheConfig.defaultIdentiyKey")
     return
+  }
+  //result为delApi从后端返回的结果类型，多为number，即删除的数量
+  const onOK = (resultFromRemoteDelApi: R) => { 
+    if (onDelOk) onDelOk(resultFromRemoteDelApi)
+    else {
+      if (EasyProConfig.EnableLog) console.log("successfully del:" + id)
+      if (cacheKey) {
+        Cache.onDelOneById(cacheKey, idKey, id)
+        dispatch("cacheUpdate-" + listApi) //删除完毕，发送refreshList，告知ListView去更新
+      } else {
+        dispatch({ type: "refreshList-delById-" + listApi, id: id })
+      }
+
+      message.success(resultFromRemoteDelApi + "条记录被删除")
+    }
   }
   confirm({
     title: '确定要删除吗？',
     icon: <ExclamationCircleFilled />,
     content: '删除后不能恢复',
     onOk: () => {
-      cachedFetch<T>({
+      cachedFetch<R>({
         url: delApi,
         method: "GET",
         attachAuthHeader: true,
         isShowLoading: true,
-        onOK: onDelOk || ((result: T) => {
-          if (EasyProConfig.EnableLog) console.log("successfully del:" + id)
-          if (cacheKey){
-             Cache.onDelOneById(cacheKey, id, idKey)
-             dispatch("cacheUpdate-" + listApi) //删除完毕，发送refreshList，告知ListView去更新
-          }else{
-            dispatch({ type: "refreshList-delById-" + listApi, id: id }) 
-          }
-
-          message.success(result + "条记录被删除")
-        })
+        onOK: onOK
       });
     }
   });

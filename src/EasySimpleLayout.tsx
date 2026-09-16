@@ -1,10 +1,11 @@
+import React from 'react';
+import { useEffect, useState } from 'react';
+
+import { Link, matchRoutes, Outlet, type RouteObject, useLocation } from 'react-router-dom';
 import { Layout, Menu } from 'antd';
 
-import { Link, matchRoutes, Outlet, RouteObject, useLocation } from 'react-router-dom';
-import { useEffect, useState } from 'react';
 //import { AppRoutes } from './AppRoutes';
-import React from 'react';
-import {  EasyRoute } from './EasyProRoute';
+import {  type EasyRoute } from './EasyProRoute';
 
 const { SubMenu } = Menu;
 const { Header, Content, Sider } = Layout;

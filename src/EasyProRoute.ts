@@ -1,6 +1,6 @@
 
-import { MenuDataItem } from "@ant-design/pro-layout";
-import { RouteObject } from "react-router-dom";
+import { type RouteObject } from "react-router-dom";
+import { type MenuDataItem } from "@ant-design/pro-components";
 
 
 export type EasyRoute = Omit<RouteObject, 'children'> & Omit<MenuDataItem, 'routes'> & {

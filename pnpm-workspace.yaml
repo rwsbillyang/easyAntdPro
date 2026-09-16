@@ -1,0 +1,2 @@
+overrides:
+  '@rwsbillyang/usecache': link:../usecache

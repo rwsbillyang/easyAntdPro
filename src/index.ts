@@ -1,8 +1,8 @@
 import { EasyProConfig } from "./EasyProConfig";
-import  {EasyProLayout, EasyProLayoutProps } from "./EasyProLayout";
-import { EasyRoute } from "./EasyProRoute";
-import { EasyProTable, EasySchemaFormEditor, UpdateTreeNodeParams, deleteOne, saveOne } from "./EasyProTable";
-import { EasyAsyncSelectProps, EasyProTableProps, EditProps, asyncSelect2Request, asyncSelectProps2Request } from "./EasyProTableProps";
+import  {EasyProLayout, type EasyProLayoutProps } from "./EasyProLayout";
+import { type EasyRoute } from "./EasyProRoute";
+import { EasyProTable, EasySchemaFormEditor, type UpdateTreeNodeParams, deleteOne, saveOne } from "./EasyProTable";
+import { type EasyAsyncSelectProps, type EasyProTableProps, type EditProps, asyncSelect2Request, asyncSelectProps2Request } from "./EasyProTableProps";
 import { EasySimpleLayout, routesToMenu } from "./EasySimpleLayout";
 
 

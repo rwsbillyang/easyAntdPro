@@ -1,10 +1,14 @@
 {
   "compilerOptions": {
-    "baseUrl": "/",
-    "target": "es6",
+    "target": "ES2022",
     "module": "ESNext",
-    "moduleResolution": "Node",
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "moduleResolution": "bundler",
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext",
+      "ES2022",
+    ],
     "skipDefaultLibCheck": true,
     "noEmit": true,
     "sourceMap": true,
@@ -12,7 +16,7 @@
     "skipLibCheck": true,
     "strictNullChecks": true,
     "esModuleInterop": true,
-    "suppressImplicitAnyIndexErrors": true,
+    "verbatimModuleSyntax": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
@@ -23,25 +27,10 @@
     "noImplicitAny": false,
     "importHelpers": false,
     "resolveJsonModule": true,
-    "isolatedModules": false,
-    "jsx": "react",
-    "declaration": true,
-    "paths": {
-      "easyAntdPro": [
-        "./src"
-      ],
-      "easyAntdPro/*": [
-        "./src/*"
-      ]
-    }
+    "isolatedModules": true,
+    "jsx": "react"
   },
   "include": [
-    "**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "build",
-    "dist",
-    "__unconfig_vite.config.ts"
+    "src"
   ]
 }

@@ -1,9 +1,12 @@
-/// <reference types="vitest" />
-/// <reference types="vite/client" />
+import react from '@vitejs/plugin-react'
+import { resolve } from 'node:path'
+import { readFileSync } from 'node:fs'
+import { defineConfig } from 'vite'
+import dts from 'unplugin-dts/vite'
 
-import dts from 'vite-plugin-dts';
-import path from 'path';
-import { defineConfig } from 'vite';
+const pkg = JSON.parse(
+  readFileSync(new URL('./package.json', import.meta.url), 'utf-8'),
+) as { dependencies?: Record<string, string>; peerDependencies?: Record<string, string> }
 
 // vite config can not read babel.config.js🤣🤣🤣
 export default defineConfig({
@@ -15,49 +18,29 @@ export default defineConfig({
         if (type === 'cjs') return 'index.js';
         return 'index.js';
       },
-      entry: path.resolve(__dirname, 'src/index.ts'),
+      entry: resolve(import.meta.dirname, 'src/index.ts'),
       formats: ['es', 'cjs'],
     },
-    sourcemap: false,
-    rollupOptions: {
-      treeshake: false,
+    sourcemap: true,
+    rolldownOptions: {
+      // dependencies / peerDependencies 一律外部化，不打包进库
       external: [
-        'react',
-        'react-dom',
-        "react-router-dom",
-        "eact-router-manage",
-        "weui",
-        "@rwsbillyang/usecache",
-        "tslib",
-        "use-bus",
-        "qrcode.react",
-        "react-use-websocket",
-        "antd",
-        "dayjs",
-        "@ant-design/pro-form",
-        "@ant-design/pro-layout",
-        "@ant-design/pro-provider",
-        "@ant-design/pro-table"
+        ...Object.keys(pkg.dependencies ?? {}),
+        ...Object.keys(pkg.peerDependencies ?? {}),
       ],
     },
   },
+
   plugins: [
     // https://www.npmjs.com/package/vite-plugin-dts
     dts({
       include: 'src',
-      rollupTypes: true,
+      exclude: ['src/demo.ts'],
+      bundleTypes: true,
       afterBuild: () => {
         // do something else
       },
     }),
+    react()
   ],
-  // https://github.com/vitest-dev/vitest
-  // test: {
-  //   globals: true,
-  //   environment: 'jsdom',
-  //   setupFiles: ['./setupTests.ts'],
-  //   transformMode: {
-  //     web: [/.[tj]sx$/],
-  //   },
-  // },
 });

@@ -2,6 +2,8 @@
 - Easy to use [antd-pro](https://github.com/ant-design/ant-design-pro) because more out-of-box.
 - For use in pure react app, not need [umi](https://umijs.org/en-US),  super lightweight.
 
+Since v2.0.0, easy-antd-pro is based on react 19 and typescript 6 and antd 6
+
 
 ## 1.1. Add dependency
 ```shell

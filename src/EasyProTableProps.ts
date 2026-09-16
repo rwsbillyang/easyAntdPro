@@ -1,9 +1,7 @@
+import { type ProColumns } from "@ant-design/pro-components";
+import { type ProFormColumnsType } from "@ant-design/pro-components";
 
-import { BasePageQuery, StorageType, BaseRecord, cachedFetchPromise } from "@rwsbillyang/usecache";
-
-import { ProColumns } from "@ant-design/pro-table";
-import { ProFormColumnsType } from "@ant-design/pro-form";
-
+import { type BasePageQuery, StorageType, type BaseRecord, cachedFetchPromise } from "@rwsbillyang/usecache";
 
 
 /**
@@ -39,7 +37,7 @@ export interface EasyProTableProps<T extends BaseRecord, Q extends BasePageQuery
   
   transformBeforeEdit?: (data?: Partial<T>) => Partial<T> | undefined//编辑某行数据时，编辑前对其进行变换。注意：未对table中的列表数据进行变换
   transformBeforeSave?: (data: T) => T | undefined //提提交保存前对提交的数据进行修改变换
-  idKey?: string //primary key, _id for mongoDB doc, id for sql record
+  idKey: keyof T //primary key, _id for mongoDB doc, id for sql record
   cacheKey?: string //不同的搜索条件initialQuery，应给出不同的缓存键值，如： appId+"/fan/"+scene，否则可能共用列表值
   name: string //cacheKey 可能为空，而搜索条件依赖于cacheKey，当cacheKey为空时需要使用name区别
 

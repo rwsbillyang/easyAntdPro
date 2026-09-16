@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
-
+import { Link, Outlet } from 'react-router-dom';
 import {
     PageContainer,
-    ProLayout,
-    ProLayoutProps
-} from '@ant-design/pro-layout';
+    ProLayout, ProConfigProvider,
+    type ProLayoutProps
+} from '@ant-design/pro-components';
 
-
-import { Link, Outlet } from 'react-router-dom';
-import { ProConfigProvider } from '@ant-design/pro-provider';
 
 export interface EasyProLayoutProps extends ProLayoutProps{
     dark?: boolean
