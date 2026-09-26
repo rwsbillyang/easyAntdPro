@@ -31,42 +31,42 @@
   "peerDependencies": {
     "@ant-design/pro-components": "^3.1.14-7",
     "@ant-design/icons":"6.3.4",
-    "@rwsbillyang/usecache": "link:../usecache",
+    "@rwsbillyang/usecache": "file:/Users/bill/dev/npm-local/rwsbillyang-usecache-2.0.0.tgz",
     "antd": "^6.6.3",
     "dayjs": "^1.11.23",
-    "react": "^18.0.0 || ^19.2.8",
-    "react-dom": "^19.2.8",
+    "react": ">=18.0.0 || ^19.0.0",
+    "react-dom": ">=18.0.0 || ^19.0.0",
     "react-router-dom": "^7.18.3",
     "use-bus": "^2.5.2"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "^7",
     "@types/node": "^24.13.3",
-    "@types/react": "^19.2.18",
-    "@vitejs/plugin-react": "^6.1.0",
+    "@types/react": "^19.0.0",
     "oxlint": "^1.79.0",
     "typescript": "~6.0.2",
     "unplugin-dts": "^1",
-    "vite": "^8.2.2"
+    "@vitejs/plugin-react": "^5.2.0",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vite": "^7.1.5"
   },
   "sideEffects": [
-    "dist/index.css"
+    "dist/**/*.css"
   ],
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
   "module": "./dist/esm/index.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/esm/index.d.ts",
   "typings": "./dist/index.d.ts",
   "files": [
     "dist",
     "package.json",
-    "README.md",
-    "global.d.ts"
+    "README.md"
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/esm/index.d.ts",
       "import": "./dist/esm/index.js",
-      "require": "./dist/index.js"
+      "require": "./dist/index.cjs"
     }
   }
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { Button, Modal, message } from 'antd';
@@ -27,8 +27,8 @@ export interface UpdateTreeNodeParams{
 
 //给currentQuery中的初始值设置到columns中去，以让searchForm有正确的初始值
 //顺带添加一些actions操作
-function applyInitalQuery<T extends BaseRecord, Q extends BasePageQuery = BasePageQuery>(actions: ProColumns<T>, props: EasyProTableProps<T, Q>, 
-  columns?: ProColumns<T>[], query?: Q) {
+function applyInitalQuery<T extends BaseRecord, Q extends BasePageQuery = BasePageQuery, ValueType = 'text'>(actions: ProColumns<T, ValueType>, props: EasyProTableProps<T, Q, ValueType>, 
+  columns?: ProColumns<T, ValueType>[], query?: Q) {
   //const supportEdit = props.editForm && typeof props.editForm === "function" && props.editForm()
   const {saveApi, delApi,  disableActions} = props
 
@@ -71,7 +71,7 @@ function applyInitalQuery<T extends BaseRecord, Q extends BasePageQuery = BasePa
  * 7. 提供delApi将支持删除功能
  * 8. 支持自定义toolBarRender，若不提供，将默认有”新增“按钮（如果支持编辑的话）
  */
-export const EasyProTable = <T extends BaseRecord, Q extends BasePageQuery = BasePageQuery>(props: EasyProTableProps<T, Q> & Omit<ProTableProps<T, Q, 'text'>, 'params' | 'request' | 'dataSource'>) => {
+export const EasyProTable = <T extends BaseRecord, Q extends BasePageQuery = BasePageQuery, ValueType = 'text'>(props: EasyProTableProps<T, Q, ValueType> & Omit<ProTableProps<T, Q,  ValueType>, 'params' | 'request' | 'dataSource'>) => {
 
   const { isLoading, isError, errMsg, loadMoreState, setQuery, refreshCount, setRefresh, list, setList, setUseCache, setIsLoadMore }
     = useCacheList<T, Q>(props.listApi, props.cacheKey, props.initialQuery, props.needLoadMore === false ? false : true)
@@ -205,7 +205,7 @@ export const EasyProTable = <T extends BaseRecord, Q extends BasePageQuery = Bas
       ] )
 
       //编辑、删除等按钮
-      const actions: ProColumns<T> = props.actions ? props.actions : {
+      const actions: ProColumns<T, ValueType> = props.actions ? props.actions : {
         title: '操作',
         valueType: 'option',
         dataIndex: 'actions',
@@ -222,7 +222,7 @@ export const EasyProTable = <T extends BaseRecord, Q extends BasePageQuery = Bas
       const columns = applyInitalQuery(actions, props, props.columns, props.initialQuery)
 
       return <div>
-        <ProTable<T, Q>
+        <ProTable<T, Q, ValueType>
           {...props}
           loading={isLoading}
           columns={columns}
@@ -291,7 +291,7 @@ export const EasyProTable = <T extends BaseRecord, Q extends BasePageQuery = Bas
  * 若函数返回undefined则也没有编辑按钮。当用于新增时，初始数据不全，故函数参数用Partial 
  * @returns 
  */
-function EditorHub<T extends BaseRecord, Q extends BasePageQuery>(props: EditProps<T, Q>) {
+function EditorHub<T extends BaseRecord, Q extends BasePageQuery, ValueType = 'text'>(props: EditProps<T, Q, ValueType>) {
   const navigate = useNavigate();
   if (!props.tableProps?.saveApi) return null
 
@@ -306,7 +306,7 @@ function EditorHub<T extends BaseRecord, Q extends BasePageQuery>(props: EditPro
     const path = editFormConfig(oldValue)
     if (path) {
       if (path === 'ModalForm' || path === 'DrawerForm') {
-        return <EasySchemaFormEditor {...props} record={record} key="editOne" />
+        return <EasySchemaFormEditor<T, Q, ValueType> {...props} record={record} key="editOne" />
       } else {
         const { style, isAdd } = props
         const state = { record: record, isAdd }
@@ -320,7 +320,7 @@ function EditorHub<T extends BaseRecord, Q extends BasePageQuery>(props: EditPro
     }
     return null
   } else {
-    return <EasySchemaFormEditor {...props} record={record} key="editOne" />
+    return <EasySchemaFormEditor<T, Q, ValueType> {...props} record={record} key="editOne" />
   }
 
 }
@@ -328,7 +328,7 @@ function EditorHub<T extends BaseRecord, Q extends BasePageQuery>(props: EditPro
 
 
 //'Form', 'ModalForm', 'DrawerForm', 'LightFilter', 'QueryFilter', 'StepsForm', 'StepForm', 'Embed',
-export function EasySchemaFormEditor<T extends BaseRecord, Q extends BasePageQuery>(props: EditProps<T, Q>) {
+export function EasySchemaFormEditor<T extends BaseRecord, Q extends BasePageQuery, ValueType = 'text'>(props: EditProps<T, Q, ValueType>) {
   // const { message } = App.useApp();
   const layout = props.tableProps.layoutType || 'ModalForm'
   const columns = props.tableProps.formColumns || (props.columns? (props.columns as any) : undefined)

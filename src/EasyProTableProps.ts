@@ -5,6 +5,7 @@ import { type BasePageQuery, StorageType, type BaseRecord, cachedFetchPromise } 
 
 
 /**
+ * EasyProTable 需要使用的属性，对原有ProTableProps<DataSource, U, ValueType = 'text'>的新增
  * @param editForm: 若提供的是ProFormLayoutType('ModalForm' | 'DrawerForm' )，则按当前配置进入编辑页面；
  * 若提供的是函数并返回path路径，则跳转过去的路径，如"/admin/oa/edit", 若函数返回undefined则也没有编辑按钮。
  * 当用于新增时，初始数据不全，故函数参数用Partial 
@@ -13,7 +14,7 @@ import { type BasePageQuery, StorageType, type BaseRecord, cachedFetchPromise } 
  * @param transformBeforeEdit 编辑某行数据时，编辑前对其进行变换。注意：未对table中的列表数据进行变换，只是在编辑前，对编辑数据进行变换
  */
 
-export interface EasyProTableProps<T extends BaseRecord, Q extends BasePageQuery> {
+export interface EasyProTableProps<T extends BaseRecord, Q extends BasePageQuery, ValueType = 'text'> {
   initialQuery?: Q //列表初始查询条件
   listApi: string, //请求列表api，如'/api/oa/admin/list'
   needLoadMore?: boolean //默认为true，是否显示加载更多按钮 
@@ -24,7 +25,7 @@ export interface EasyProTableProps<T extends BaseRecord, Q extends BasePageQuery
   disableDel?: (e: T) => boolean //提供了且返回true，则关闭该项删除功能
 
   //没有明确禁止，且有任意saveApi、delApi则添加actions
-  actions?:  ProColumns<T> //自定义操作Action
+  actions?: ProColumns<T, ValueType> //自定义操作Action
   disableActions?:  boolean //提供且为true，则明确要求关闭actions
 
   initialValues?: Partial<T> //新增时的给定初始值，用于传递给EasySchemaFormEditor
@@ -41,20 +42,20 @@ export interface EasyProTableProps<T extends BaseRecord, Q extends BasePageQuery
   cacheKey?: string //不同的搜索条件initialQuery，应给出不同的缓存键值，如： appId+"/fan/"+scene，否则可能共用列表值
   name: string //cacheKey 可能为空，而搜索条件依赖于cacheKey，当cacheKey为空时需要使用name区别
 
-  formColumns?: ProFormColumnsType<T>[] //特殊情形下，使用单独的配置
+  formColumns?: ProFormColumnsType<T, ValueType>[] //特殊情形下，使用单独的配置
 
   lastIdFunc?: (T) => string //如果提供，将使用该函数从列表记录项中获取lastId
 }
 
 
 
-export interface EditProps<T extends BaseRecord, Q extends BasePageQuery> {
+export interface EditProps<T extends BaseRecord, Q extends BasePageQuery, ValueType='text'> {
   title?:string,
-  tableProps: EasyProTableProps<T, Q>,
+  tableProps: EasyProTableProps<T, Q, ValueType>,
   style: 'Button' | 'Link',
   isAdd: boolean,
   record?: Partial<T>,
-  columns?: ProColumns<T>[] | ProFormColumnsType<T>[],
+  columns?: ProColumns<T, ValueType>[] | ProFormColumnsType<T, ValueType>[],
   //formColumns?: ProFormColumnsType<T>[] //特殊情形下，使用单独的配置
 }
 
