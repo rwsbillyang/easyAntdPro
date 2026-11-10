@@ -4,6 +4,7 @@ import { type EasyRoute } from "./EasyProRoute";
 import { EasyProTable, EasySchemaFormEditor, type UpdateTreeNodeParams, deleteOne, saveOne } from "./EasyProTable";
 import { type EasyAsyncSelectProps, type EasyProTableProps, type EditProps, asyncSelect2Request, asyncSelectProps2Request } from "./EasyProTableProps";
 import { EasySimpleLayout, routesToMenu } from "./EasySimpleLayout";
+import { AntdAppBridge, setAntdAppInstance, getAntdAppInstance, message, modal, notification } from "./antdApp";
 
 
 
@@ -14,7 +15,9 @@ export type { EasyProLayoutProps, UpdateTreeNodeParams, EasyRoute, EasyProTableP
 export {
     EasyProConfig, EasyProLayout,  EasyProTable,
     EasySchemaFormEditor, saveOne, deleteOne,
-    asyncSelectProps2Request, asyncSelect2Request, routesToMenu, EasySimpleLayout
+    asyncSelectProps2Request, asyncSelect2Request, routesToMenu, EasySimpleLayout,
+    AntdAppBridge, setAntdAppInstance, getAntdAppInstance,
+    message, modal, notification
 };
 
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { Button, Modal, message } from 'antd';
+import { Button, Modal, message as staticMessage } from 'antd';
 import { PlusOutlined, ExclamationCircleFilled } from '@ant-design/icons';
 import { ProTable, type ProColumns, type ProTableProps } from '@ant-design/pro-components';
 import { RouteContext, type RouteContextType } from '@ant-design/pro-components';
@@ -13,8 +13,12 @@ import { Cache, type BasePageQuery, StorageType, CacheStorage, useCacheList, typ
 import { type EditProps, type EasyProTableProps } from './EasyProTableProps';
 import { EasyProConfig } from './EasyProConfig';
 import { LoadMore } from './LoadMore';
+import { getAntdAppInstance } from './antdApp';
 
-const { confirm } = Modal;
+// Use the antd App context instance when available (antd v6), otherwise fall
+// back to the static functions so behaviour stays unchanged for older setups.
+const getMessage = () => getAntdAppInstance()?.message ?? staticMessage;
+const getModal = () => getAntdAppInstance()?.modal ?? Modal;
 
 export interface UpdateTreeNodeParams{
   e: any
@@ -400,7 +404,7 @@ export function saveOne<T extends BaseRecord>(
   }
 
   const onOK = onSaveOK || ((data: T) => {
-    message.success('保存成功');
+    getMessage().success('保存成功');
 
     //const EasyIdKey = idKey || UseCacheConfig.defaultIdentiyKey || "id"
     if (cacheKey) {
@@ -444,7 +448,7 @@ export function saveOne<T extends BaseRecord>(
       return new Promise((resolve) => { resolve(true) });
     }).catch((err) => {
       console.warn("exception: " + err.message)
-      message.error(err.message)
+      getMessage().error(err.message)
     })
 
   return true;
@@ -492,10 +496,10 @@ export function deleteOne<T extends object, R = number>(
         dispatch({ type: "refreshList-delById-" + listApi, id: id })
       }
 
-      message.success(resultFromRemoteDelApi + "条记录被删除")
+      getMessage().success(resultFromRemoteDelApi + "条记录被删除")
     }
   }
-  confirm({
+  getModal().confirm({
     title: '确定要删除吗？',
     icon: <ExclamationCircleFilled />,
     content: '删除后不能恢复',

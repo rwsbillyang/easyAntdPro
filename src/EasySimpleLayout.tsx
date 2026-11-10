@@ -2,7 +2,8 @@ import React from 'react';
 import { useEffect, useState } from 'react';
 
 import { Link, matchRoutes, Outlet, type RouteObject, useLocation } from 'react-router-dom';
-import { Layout, Menu } from 'antd';
+import { App as AntdApp, Layout, Menu } from 'antd';
+import { AntdAppBridge } from './antdApp';
 
 //import { AppRoutes } from './AppRoutes';
 import {  type EasyRoute } from './EasyProRoute';
@@ -94,7 +95,10 @@ export const EasySimpleLayout: React.FC<{ menuRoutes: EasyRoute[], navRoutes?: E
               height: "100%"
             }}
           >
-            <Outlet />
+            <AntdApp>
+              <AntdAppBridge />
+              <Outlet />
+            </AntdApp>
           </Content>
         </Layout>
       </Layout>

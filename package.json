@@ -29,7 +29,7 @@
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
-    "@ant-design/pro-components": "^3.1.14-7",
+    "@ant-design/pro-components": "^3.1.15-9",
     "@ant-design/icons":"6.3.4",
     "@rwsbillyang/usecache": "file:/Users/bill/dev/npm-local/rwsbillyang-usecache-2.0.0.tgz",
     "antd": "^6.6.3",

@@ -5,6 +5,8 @@ import {
     ProLayout, ProConfigProvider,
     type ProLayoutProps
 } from '@ant-design/pro-components';
+import { App as AntdApp } from 'antd';
+import { AntdAppBridge } from './antdApp';
 
 
 export interface EasyProLayoutProps extends ProLayoutProps{
@@ -36,14 +38,17 @@ export const EasyProLayout = (props: EasyProLayoutProps) => {
                     </div>
                 }}
             >
-                <PageContainer
-                    style={{
-                        height: '200vh',
-                        minHeight: 800,
-                    }}
-                >
-                    <Outlet />
-                </PageContainer>
+                <AntdApp>
+                    <AntdAppBridge />
+                    <PageContainer
+                        style={{
+                            height: '200vh',
+                            minHeight: 800,
+                        }}
+                    >
+                        <Outlet />
+                    </PageContainer>
+                </AntdApp>
 
             </ProLayout>
         </ProConfigProvider>
