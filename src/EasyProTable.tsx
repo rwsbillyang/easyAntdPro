@@ -439,7 +439,7 @@ export function saveOne<T extends BaseRecord>(
   //   console.log("after transformed, values=", transformedData);
   // }
 
-  cachedFetchPromise<T>(saveApi, 'POST', transformedData)//undefined, StorageType.OnlySessionStorage, undefined,undefined,false
+  cachedFetchPromise<T, T>(saveApi, 'POST', transformedData)//undefined, StorageType.OnlySessionStorage, undefined,undefined,false
     .then((data) => {
       if (data) {
         onOK(data)
