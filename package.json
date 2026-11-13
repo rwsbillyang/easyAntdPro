@@ -29,9 +29,9 @@
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {
+    "@ant-design/icons": "6.3.4",
     "@ant-design/pro-components": "^3.1.15-9",
-    "@ant-design/icons":"6.3.4",
-    "@rwsbillyang/usecache": "file:/Users/bill/dev/npm-local/rwsbillyang-usecache-2.0.0.tgz",
+    "@rwsbillyang/usecache": "link:../usecache",
     "antd": "^6.6.3",
     "dayjs": "^1.11.23",
     "react": ">=18.0.0 || ^19.0.0",
@@ -43,12 +43,12 @@
     "@microsoft/api-extractor": "^7",
     "@types/node": "^24.13.3",
     "@types/react": "^19.0.0",
+    "@vitejs/plugin-react": "^5.2.0",
     "oxlint": "^1.79.0",
     "typescript": "~6.0.2",
     "unplugin-dts": "^1",
-    "@vitejs/plugin-react": "^5.2.0",
-    "vite-tsconfig-paths": "^5.1.4",
-    "vite": "^7.1.5"
+    "vite": "^7.1.5",
+    "vite-tsconfig-paths": "^5.1.4"
   },
   "sideEffects": [
     "dist/**/*.css"

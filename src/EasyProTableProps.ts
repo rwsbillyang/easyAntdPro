@@ -74,7 +74,7 @@ export interface EasyAsyncSelectProps<T extends BaseRecord, Q extends BasePageQu
 
 
 export const asyncSelectProps2Request = <T extends BaseRecord, Q extends BasePageQuery>(props: EasyAsyncSelectProps<T, Q>, cb?: (data: any) => void, method: "GET" | "POST" | "PUT" | "DELETE" = "GET") => {
-  //console.log(JSON.stringify(params))
+  //console.log(props)
   //const queryStr = query2Params()
   return cachedFetchPromise(props.url, method, props.query, props.key, StorageType.OnlySessionStorage, undefined, (bizData: any) => {
     if(cb) cb(bizData)

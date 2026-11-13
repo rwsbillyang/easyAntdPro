@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { Button, Modal, message as staticMessage } from 'antd';
+import { Button, Modal } from 'antd';
 import { PlusOutlined, ExclamationCircleFilled } from '@ant-design/icons';
 import { ProTable, type ProColumns, type ProTableProps } from '@ant-design/pro-components';
 import { RouteContext, type RouteContextType } from '@ant-design/pro-components';
@@ -13,11 +13,10 @@ import { Cache, type BasePageQuery, StorageType, CacheStorage, useCacheList, typ
 import { type EditProps, type EasyProTableProps } from './EasyProTableProps';
 import { EasyProConfig } from './EasyProConfig';
 import { LoadMore } from './LoadMore';
-import { getAntdAppInstance } from './antdApp';
+import { getAntdAppInstance, getMessage, showError } from './antdApp';
 
 // Use the antd App context instance when available (antd v6), otherwise fall
 // back to the static functions so behaviour stays unchanged for older setups.
-const getMessage = () => getAntdAppInstance()?.message ?? staticMessage;
 const getModal = () => getAntdAppInstance()?.modal ?? Modal;
 
 export interface UpdateTreeNodeParams{
@@ -389,7 +388,8 @@ export function saveOne<T extends BaseRecord>(
 ) {
   if (!saveApi) {
     console.warn("no saveApi")
-    alert("no saveApi")
+    //alert("no saveApi")
+    getMessage().error("not config saveApi")
     return false
   }
 
@@ -447,8 +447,8 @@ export function saveOne<T extends BaseRecord>(
       else { console.log("no data return after save") }
       return new Promise((resolve) => { resolve(true) });
     }).catch((err) => {
-      console.warn("exception: " + err.message)
-      getMessage().error(err.message)
+      console.warn("some wrong occurs when saveOne: ", err)
+      showError(err, '保存失败')
     })
 
   return true;
@@ -474,13 +474,15 @@ export function deleteOne<T extends object, R = number>(
   cacheKey?: string
 ) {
   if (!delApi) {
-    alert("no delApi")
+    //alert("no delApi")
+    getMessage().error("not config delApi")
     return
   }
 
   const id = item[idKey] as (string | number | undefined)//getValueByKey(item, idKey as string)
   if (!id) {
-    alert("no id")
+    //alert("no id")
+    getMessage().error("no id")
     console.warn("no id when del, please set pageProps.key or UseCacheConfig.defaultIdentiyKey")
     return
   }

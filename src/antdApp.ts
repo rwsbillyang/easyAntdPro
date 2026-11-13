@@ -1,4 +1,5 @@
 import { App as AntdApp, message as staticMessage, Modal as staticModal, notification as staticNotification } from 'antd';
+import { toErrMsg } from '@rwsbillyang/usecache';
 
 export type AntdAppInstance = ReturnType<typeof AntdApp.useApp>;
 
@@ -36,6 +37,14 @@ export function AntdAppBridge(): null {
 const getMsg = (): any => getAntdAppInstance()?.message ?? staticMessage;
 const getMdl = (): any => getAntdAppInstance()?.modal ?? staticModal;
 const getNtf = (): any => getAntdAppInstance()?.notification ?? staticNotification;
+
+// 与 getMsg 等价，作为统一的错误上报入口（getMessage().error(...)）。
+export const getMessage = getMsg;
+
+// 统一的错误上报入口：通过 antd App 上下文的 message.error 提示错误。
+export function showError(e: unknown, fallback?: string): void {
+  getMessage().error(toErrMsg(e, fallback));
+}
 
 export const message = {
   success: (...a: any[]) => (getMsg() as any).success(...a),
