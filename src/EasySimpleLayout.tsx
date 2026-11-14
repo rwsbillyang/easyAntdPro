@@ -1,5 +1,5 @@
 import React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Link, matchRoutes, Outlet, type RouteObject, useLocation } from 'react-router-dom';
 import { App as AntdApp, Layout, Menu } from 'antd';
@@ -63,12 +63,16 @@ export const EasySimpleLayout: React.FC<{ menuRoutes: EasyRoute[], navRoutes?: E
     return null;
   }
 
+  //菜单配置通常是静态的，用 useMemo 避免每次路由变化都重建整棵菜单元素树
+  const headerMenu = useMemo(() => navRoutes ? routesToMenu(navRoutes, false, "header") : null, [navRoutes])
+  const sideMenu = useMemo(() => routesToMenu(menuRoutes, true, "menu"), [menuRoutes])
+
   return (
     <Layout>
       {(navRoutes && navRoutes.length > 0) && <Header className="header" style={{height: "48"}}>
         <div className='logo'/>
         <Menu theme="dark" mode="horizontal" defaultSelectedKeys={defaultNavSelectedKeys}>
-          {routesToMenu(navRoutes, false,"header")}
+          {headerMenu}
         </Menu>  
       </Header>}
 
@@ -81,7 +85,7 @@ export const EasySimpleLayout: React.FC<{ menuRoutes: EasyRoute[], navRoutes?: E
             defaultOpenKeys={defaultOpenKeys}
             style={{ height: '100%', borderRight: 0 }}
           >
-            {routesToMenu(menuRoutes, true, "menu")}
+            {sideMenu}
           </Menu>
         </Sider>
 

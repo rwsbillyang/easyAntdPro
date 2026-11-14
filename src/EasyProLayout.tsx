@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import {
     PageContainer,
@@ -26,7 +26,7 @@ export const EasyProLayout = (props: EasyProLayoutProps) => {
             <ProLayout
                 {...props}
                 location={{ pathname }}
-                menuItemRender={(menuItemProps, defaultDom) => {
+                menuItemRender={useCallback((menuItemProps, defaultDom) => {
                     if (menuItemProps.isUrl || !menuItemProps.path) {
                         return defaultDom;
                     }
@@ -36,7 +36,7 @@ export const EasyProLayout = (props: EasyProLayoutProps) => {
                         }}>
                         <Link to={menuItemProps.path} target={menuItemProps.target}>{defaultDom}</Link>
                     </div>
-                }}
+                }, [setPathname])}
             >
                 <AntdApp>
                     <AntdAppBridge />

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { Button, Modal } from 'antd';
@@ -89,7 +89,7 @@ export const EasyProTable = <T extends BaseRecord, Q extends BasePageQuery = Bas
   // console.log("currentQuery=", currentQuery)
   // console.log("current.query=", current.query)
   
-  const dataSource = props.listTransform ? props.listTransform(list, props.listTransformArgs) : list
+  const dataSource = useMemo(() => props.listTransform ? props.listTransform(list, props.listTransformArgs) : list, [list, props.listTransform, props.listTransformArgs])
   //console.log("props=", props)
   //console.log("dataSource=", dataSource)
 
@@ -146,7 +146,7 @@ export const EasyProTable = <T extends BaseRecord, Q extends BasePageQuery = Bas
     }, [list])
 
 
-  const resetPagination = () => {
+  const resetPagination = useCallback(() => {
     const p = current.query?.pagination
     //如果值有改变，则重置lastId
     if (p) {
@@ -160,8 +160,9 @@ export const EasyProTable = <T extends BaseRecord, Q extends BasePageQuery = Bas
         p.lastId = undefined
       }
     }
-  }
-  const searchReset = () => {
+  }, [setIsLoadMore])
+
+  const searchReset = useCallback(() => {
     Cache.evictCache(cachedQueryKey, StorageType.OnlySessionStorage)
 
     resetPagination()
@@ -170,10 +171,11 @@ export const EasyProTable = <T extends BaseRecord, Q extends BasePageQuery = Bas
     if (EasyProConfig.EnableLog) console.log("after searchReset: " + JSON.stringify(q))
     setUseCache(false)
     setQuery(q)
-  }
+  }, [cachedQueryKey, props.initialQuery, resetPagination, setUseCache, setQuery])
+
   //useBus('searchReset', searchReset)
 
-  const search = (params: Q) => {
+  const search = useCallback((params: Q) => {
     if (EasyProConfig.EnableLog) console.log("search: " + JSON.stringify(params))
     resetPagination()
     const q = { ...params, pagination: current.query?.pagination } as Q
@@ -182,7 +184,37 @@ export const EasyProTable = <T extends BaseRecord, Q extends BasePageQuery = Bas
 
     setUseCache(false)
     setQuery(q)
-  }
+  }, [cachedQueryKey, resetPagination, setUseCache, setQuery])
+
+  //加载更多回调：依赖 list 以获取最后一条记录作为 lastId
+  const loadMore = useCallback(() => {
+    setUseCache(false)
+    setIsLoadMore(true)
+
+    const p = current.query?.pagination
+
+    //如果指定了current，且大于0，则优先使用current进行分页
+    if (p?.current) {
+      p.current += 1
+      p.lastId = undefined
+    } else {
+      //排序时，若指定了sortKey则使用指定的，否则默认使用_id
+     // const sortKey = (p?.sKey) ? p.sKey : (props.idKey || "_id")
+      const lastValue = props.lastIdFunc ? props.lastIdFunc(list[list.length - 1]) : list[list.length - 1][ p?.sKey || props.idKey ] + "" //转换为字符串
+      if (p)
+        p.lastId = lastValue
+      else {
+        if (current.query) {
+          current.query.pagination = { lastId: lastValue }
+        } else {
+          const q: BasePageQuery = { pagination: { lastId: lastValue } }
+          current.query = q as Q
+        }
+      }
+    }
+
+    setQuery(current.query)
+  }, [list, props.lastIdFunc, props.idKey, setUseCache, setIsLoadMore, setQuery])
   //useBus('search', (e: EventAction)=>{(search(e.payload))})
 
   const formRef = useRef<ProFormInstance>(undefined)
@@ -196,47 +228,42 @@ export const EasyProTable = <T extends BaseRecord, Q extends BasePageQuery = Bas
   //if (EasyProConfig.EnableLog) console.log("isLoading=" + isLoading + ", current.query=" + JSON.stringify(current.query)+ ", list=" + JSON.stringify(list))
 
 
-  return <RouteContext.Consumer>
-    {(value: RouteContextType) => {
-      const title = value.title ? value.title : ""
-      //console.log("RouteContextType", value)
+  // RouteContext 提供 title 等信息（改用 useContext，便于在组件顶层使用 useMemo）
+  const routeContext = useContext(RouteContext) as RouteContextType
+  const title = routeContext?.title ? routeContext.title : ""
 
-      //若提供了自定义的toolBarRender则优先使用自定义的,
-      //没提供，则检查是否明确关闭了新增功能或没提供saveApi
-      const EasyToolBarRender = props.toolBarRender ? props.toolBarRender :( (props.disableAdd || !props.saveApi) ? undefined: () => [
+  //操作列：仅依赖 props 与 title，使用 useMemo 避免每次渲染重建
+  const actions = useMemo<ProColumns<T, ValueType>>(() => props.actions ? props.actions : {
+    title: '操作',
+    valueType: 'option',
+    dataIndex: 'actions',
+    render: (text, row) => [
+      //不存在saveApi，或 disableEdit返回true，则没编辑按钮
+      (!props.saveApi || (props.disableEdit && props.disableEdit(row))) ? undefined : <EditorHub title={title} tableProps={props} style='Link' isAdd={false} record={row} columns={props.columns} key="edit" />,
+      //不存在delApi，或 disableDel返回true，则没删除按钮
+      (!props.delApi || (props.disableDel && props.disableDel(row))) ? undefined : <a onClick={() => delOne(row, props.idKey, props.delApi, props.listApi, props.cacheKey)} key="delete">删除</a>,
+    ].filter((e) => !!e)
+  }, [props.actions, props.saveApi, props.delApi, props.disableEdit, props.disableDel, props.idKey, props.listApi, props.cacheKey, props.columns, title])
+
+  //列：克隆 props.columns 避免直接修改父级传入的数组，并用 useMemo 缓存，避免重复计算
+  const columns = useMemo(() => applyInitalQuery(actions, props, props.columns ? [...props.columns] : undefined, props.initialQuery),
+    [actions, props.saveApi, props.delApi, props.disableActions, props.columns, props.initialQuery])
+
+  return <div>
+    <ProTable<T, Q, ValueType>
+      {...props}
+      loading={isLoading}
+      columns={columns}
+      formRef={formRef} // 赋值ref
+      dataSource={dataSource}
+      rowKey={props.rowKey || props.idKey || "_id"}
+      pagination={props.pagination ? props.pagination : false}
+      onReset={searchReset}
+      onSubmit={search}
+      toolBarRender={props.toolBarRender ? props.toolBarRender : ((props.disableAdd || !props.saveApi) ? undefined : () => [
         <EditorHub title={title} tableProps={props} style='Button' isAdd={true} record={props.initialValues} columns={props.columns} />
-      ] )
-
-      //编辑、删除等按钮
-      const actions: ProColumns<T, ValueType> = props.actions ? props.actions : {
-        title: '操作',
-        valueType: 'option',
-        dataIndex: 'actions',
-        render: (text, row) => [
-           //不存在saveApi，或 disableEdit返回true，则没编辑按钮
-          (!props.saveApi || (props.disableEdit && props.disableEdit(row))) ? undefined: <EditorHub title={title} tableProps={props} style='Link' isAdd={false} record={row} columns={props.columns} key="edit" />,// EditorHub('Link', false, row, props.columns, props.editConfig), //报错，undefined of length
-          //不存在delApi，或 disableDel返回true，则没删除按钮
-          (!props.delApi || (props.disableDel && props.disableDel(row))) ? undefined : <a onClick={() => delOne(row, props.idKey, props.delApi , props.listApi, props.cacheKey)} key="delete" >删除</a> ,
-        ].filter((e) => !!e)
-      }
-
-      //避免applyinitalQuery添加actions时重复不断添加
-     // const columns = useMemo(() => { return applyinitalQuery(actions, props.saveApi, props.delApi, props.columns, props.initialQuery) }, [])
-      const columns = applyInitalQuery(actions, props, props.columns, props.initialQuery)
-
-      return <div>
-        <ProTable<T, Q, ValueType>
-          {...props}
-          loading={isLoading}
-          columns={columns}
-          formRef={formRef} // 赋值ref
-          dataSource={dataSource}
-          rowKey={props.rowKey || props.idKey || "_id"}
-          pagination={props.pagination ? props.pagination : false}
-          onReset={searchReset}
-          onSubmit={search}
-          toolBarRender={EasyToolBarRender}
-          scroll={{scrollToFirstRowOnChange: true}}
+      ])}
+      scroll={{ scrollToFirstRowOnChange: true }}
         //request?: ( params: U & {pageSize?: number; current?: number; keyword?: string;}, 
         //  sort: Record<string, SortOrder>, 
         //  filter: Record<string, (string | number)[] | null>) => Promise<Partial<RequestData<DataSource>>>;
@@ -249,38 +276,9 @@ export const EasyProTable = <T extends BaseRecord, Q extends BasePageQuery = Bas
           loadMoreState={loadMoreState}
           isError={isError}
           errMsg={errMsg}
-          loadMore={() => {
-            setUseCache(false)
-            setIsLoadMore(true)
-
-            const p = current.query?.pagination
-
-            //如果指定了current，且大于0，则优先使用current进行分页
-            if (p?.current) {
-              p.current += 1
-              p.lastId = undefined
-            } else {
-              //排序时，若指定了sortKey则使用指定的，否则默认使用_id
-             // const sortKey = (p?.sKey) ? p.sKey : (props.idKey || "_id")
-              const lastValue = props.lastIdFunc ? props.lastIdFunc(list[list.length - 1]) : list[list.length - 1][ p?.sKey || props.idKey ] + "" //转换为字符串
-              if (p)
-                p.lastId = lastValue
-              else {
-                if (current.query) {
-                  current.query.pagination = { lastId: lastValue }
-                } else {
-                  const q: BasePageQuery = { pagination: { lastId: lastValue } }
-                  current.query = q as Q
-                }
-              }
-            }
-
-            setQuery(current.query)
-          }}
+          loadMore={loadMore}
         />}
-      </div>;
-    }}
-  </RouteContext.Consumer>
+  </div>
 }
 
 /**
