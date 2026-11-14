@@ -216,7 +216,7 @@ export const EasyProTable = <T extends BaseRecord, Q extends BasePageQuery = Bas
            //不存在saveApi，或 disableEdit返回true，则没编辑按钮
           (!props.saveApi || (props.disableEdit && props.disableEdit(row))) ? undefined: <EditorHub title={title} tableProps={props} style='Link' isAdd={false} record={row} columns={props.columns} key="edit" />,// EditorHub('Link', false, row, props.columns, props.editConfig), //报错，undefined of length
           //不存在delApi，或 disableDel返回true，则没删除按钮
-          (!props.delApi || (props.disableDel && props.disableDel(row))) ? undefined : <a onClick={() => deleteOne(row, props.idKey, props.delApi + "/" + row[props.idKey], undefined, props.listApi, props.cacheKey)} key="delete" >删除</a> ,
+          (!props.delApi || (props.disableDel && props.disableDel(row))) ? undefined : <a onClick={() => delOne(row, props.idKey, props.delApi , props.listApi, props.cacheKey)} key="delete" >删除</a> ,
         ].filter((e) => !!e)
       }
 
@@ -458,20 +458,20 @@ export function saveOne<T extends BaseRecord>(
  * T 为待删除的object记录类型，R为后端delApi返回的结果类型
  * @param item 待删除项
  * @param idKey 更新缓存比较时，以哪个键为准
- * @param delApi 删除api
- * @param onDelOk 删除成功后的回调，用于更新缓存，可自定义, 若提供了onDelOk可不提供后面的缓存参数
+ * @param delApi 删除api, 将按`${delApi}/${id}`形式拼接，后端需支持，无需要自行拼接待删记录的id
  * @param listApi 消息通知更新哪个列表
- * @param cacheKey 删除项所对应缓存
- * 
+* @param cacheKey 删除项所对应缓存
+ * @param onDelOk 自定义删除成功后的回调，自行更新缓存，若提供了onDelOk可不提供后面的缓存参数。
+ * 不提供则使用参数listApi和cacheKey更新缓存 
  * @returns 
  */
-export function deleteOne<T extends object, R = number>(
+export function delOne<T extends object, R = number>(
   item: T,
   idKey: keyof T, 
   delApi?: string,
-  onDelOk?: (resultFromRemoteDelApi: R) => void,
   listApi?: string,
-  cacheKey?: string
+  cacheKey?: string,
+  onDelOk?: (resultFromRemoteDelApi: R) => void
 ) {
   if (!delApi) {
     //alert("no delApi")
@@ -507,7 +507,7 @@ export function deleteOne<T extends object, R = number>(
     content: '删除后不能恢复',
     onOk: () => {
       cachedFetch<R>({
-        url: delApi,
+        url: `${delApi}/${id}` ,
         method: "GET",
         attachAuthHeader: true,
         isShowLoading: true,
